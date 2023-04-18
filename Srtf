@@ -1,0 +1,54 @@
+#include<stdio.h>
+
+struct process {
+    int pid;  // process ID
+    int arrival_time;  // arrival time of the process
+    int burst_time;  // burst time of the process
+    int remaining_time;  // remaining time to complete the process
+};
+
+int main() {
+    int n, t = 0, completed = 0, min_remaining_time, min_remaining_time_pid;
+    float total_waiting_time = 0, total_turnaround_time = 0;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    struct process p[n];
+    for (int i = 0; i < n; i++) {
+        printf("Enter the arrival time and burst time of process %d: ", i+1);
+        scanf("%d %d", &p[i].arrival_time, &p[i].burst_time);
+        p[i].pid = i+1;
+        p[i].remaining_time = p[i].burst_time;
+    }
+    printf("\nGantt Chart:\n");
+    while (completed < n) {
+        min_remaining_time = 99999;
+        min_remaining_time_pid = -1;
+        for (int i = 0; i < n; i++) {
+            if (p[i].arrival_time <= t && p[i].remaining_time < min_remaining_time && p[i].remaining_time > 0) {
+                min_remaining_time = p[i].remaining_time;
+                min_remaining_time_pid = i;
+            }
+        }
+        if (min_remaining_time_pid == -1) {
+            printf("IDLE ");
+            t++;
+            continue;
+        }
+        p[min_remaining_time_pid].remaining_time--;
+        printf("P%d ", p[min_remaining_time_pid].pid);
+        if (p[min_remaining_time_pid].remaining_time == 0) {
+            completed++;
+            int completion_time = t+1;
+            int turnaround_time = completion_time - p[min_remaining_time_pid].arrival_time;
+            int waiting_time = turnaround_time - p[min_remaining_time_pid].burst_time;
+            total_waiting_time += waiting_time;
+            total_turnaround_time += turnaround_time;
+            printf("(TAT: %d) ", turnaround_time);
+        }
+        t++;
+    }
+    printf("\n\n");
+    printf("Average Waiting Time: %.2f\n", total_waiting_time/n);
+    printf("Average Turnaround Time: %.2f\n", total_turnaround_time/n);
+    return 0;
+}
